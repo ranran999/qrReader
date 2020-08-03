@@ -1,0 +1,2 @@
+# qrReader
+QRコードリーダー（WebRCT)
