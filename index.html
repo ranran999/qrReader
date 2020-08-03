@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QRコードの画面を文字列にする</title>
+  <script src="https://rawgithub.com/cozmo/jsQR/master/dist/jsQR.js"></script>
+</head>
+
+<body>
+  <h1>WebRCTでQRコード読み込み(HTTPSのみ）</h1>
+  <video style="display:none;" autoplay playsinline></video>
+  <canvas width="1200px" height="900px"></canvas>
+  <h1 id="out"></h1>
+  <script>
+  const mediaStreamConstraints = {
+  video: true
+};
+
+const localVideo = document.querySelector("video");
+const canvas = document.querySelector("canvas");
+const out = document.querySelector("#out");
+
+function gotLocalMediaStream(mediaStream) {
+  localVideo.srcObject = mediaStream;
+}
+
+function handleLocalMediaStreamError(error) {
+  console.log("navigator.getUserMedia error: ", error);
+}
+
+navigator.mediaDevices
+  .getDisplayMedia(mediaStreamConstraints)
+  .then(gotLocalMediaStream)
+  .catch(handleLocalMediaStreamError);
+  
+   
+const interval = setInterval(()=>{
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(localVideo,0,0);
+  const image = ctx.getImageData(0,0,canvas.width,canvas.height)
+  const result = jsQR(image.data,canvas.width,canvas.height);
+  if(result){
+    clearInterval(interval);
+    if(result.data.indexOf("http")===0){
+      const a= document.createElement("a");
+      a.href =  result.data;
+      a.textContent = result.data;
+      out.appendChild(a);
+    }else{
+      out.textContent = result.data;
+    }
+    canvas.style.display="none";
+  }
+  
+},100);
+
+</script>
+</body>
+
+</html>
